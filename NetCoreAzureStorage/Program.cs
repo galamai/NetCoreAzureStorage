@@ -20,21 +20,15 @@ namespace NetCoreAzureStorage
 
         static async Task MainAsync(string[] args)
         {
-            var account = CloudStorageAccount.DevelopmentStorageAccount;
-            var client = account.CreateCloudQueueClient();
-            var queue = client.GetQueueReference("netcoreazurestorage");
-
             // the count parallel sending messages
             // if equally < 8 - work!
-            var parallelTasks = 100;
-
-            await queue.CreateIfNotExistsAsync();
+            var parallelTasks = 200;
 
             var tasks = new List<Task>();
 
             for (int i = 0; i < 1000; i++)
             {
-                tasks.Add(AddMessageAsync(queue));
+                tasks.Add(AddMessageAsync());
 
                 while (tasks.Count >= parallelTasks)
                 {
@@ -49,8 +43,13 @@ namespace NetCoreAzureStorage
             Console.ReadLine();
         }
 
-        static async Task AddMessageAsync(CloudQueue queue)
+        static async Task AddMessageAsync()
         {
+            // new instance
+            var account = CloudStorageAccount.DevelopmentStorageAccount;
+            var client = account.CreateCloudQueueClient();
+            var queue = client.GetQueueReference("netcoreazurestorage");
+
             Interlocked.Increment(ref _sended);
             Console.Write($"\r{_sended} {_added}");
 
